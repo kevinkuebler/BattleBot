@@ -71,7 +71,7 @@ board.on("ready", function() {
 
   stdin.on("keypress", function(chunk, key) {
       if (!key || !keyMap[key.name]) return;      
-
+      console.log(key.name);
       keyMap[key.name]();
   });
 
