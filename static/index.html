@@ -1,0 +1,132 @@
+<html>
+	<head>
+		<style>
+			.controller {
+				height: 500px;
+				width: 500px;
+				border: 2px solid black;
+				position: absolute;
+				right: 100px;
+				bottom: 50px;
+			}
+
+			.stop {
+				height: 100px;
+				width: 200px;
+				position: absolute;
+				left: 50px;
+				bottom: 50px;
+			}
+
+			.arm {
+				position: absolute;
+				top: 100px;
+				left: 50px;
+			}
+
+			.arm button {
+				width: 200px;
+				height: 100px;
+				display: block;
+			}
+		</style>
+
+		<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	</head>
+	<body>
+		<div class="arm">
+			<button class="up">Up</button>
+			<button class="down">Down</button>
+		</div>
+		<button class="stop">Stop</button>
+		<div class="controller"></div>
+
+		<script type="text/javascript">
+			var inControl = false;
+			var debounce = true;
+
+			function eventToXY(evt) {
+				if(evt.type.indexOf('touch') === 0) {
+					var rect = evt.target.getBoundingClientRect();
+					var x = evt.originalEvent.targetTouches[0].pageX - rect.left;
+					var y = evt.originalEvent.targetTouches[0].pageY - rect.top;
+					return {
+						x: x,
+						y: y
+					};
+				} else {
+					return {
+						x: evt.offsetX,
+						y: evt.offsetY
+					};
+				}
+			}
+
+			function processPosition(evt) {
+				var $target = $(evt.target);
+				var xy = eventToXY(evt);
+				var x = xy.x;
+				var y = xy.y;
+				var h = ($target.height() / 2);
+				var w = ($target.width() / 2);
+
+				var u = (y - h) * -1;
+				var l = (x - w) * -1;
+				var r = (x - w);
+
+				if(u < 20 && u > -10) { u = 0; }
+				if(l < 20) { l = 0; }
+				if(r < 20) { r = 0; }
+
+				console.log(u, l, r);
+				$.get('http://localhost:3000/x?u=' + u + '&l=' + l + '&r=' + r);
+			}
+
+			function mouseup(evt) {
+				evt.preventDefault();
+
+				inControl = false;
+				$.get('http://localhost:3000/x?u=0&l=0&r=0');
+			}
+
+			function mousedown(evt) {
+				console.log(evt);
+				evt.preventDefault();
+
+				inControl = true;
+				processPosition(evt);
+			}
+
+			function mousemove(evt) {
+				evt.preventDefault();
+
+				if(inControl && debounce) {
+					debounce = false;
+					processPosition(evt);
+					setTimeout(function() {
+						debounce = true;
+					}, 300);
+				}
+			}
+
+			$('.stop').on('click', mouseup);
+
+			$('.controller').on('mouseup', mouseup);
+			$('.controller').on('touchend', mouseup);
+
+			$('.controller').on('mousedown', mousedown);
+			$('.controller').on('touchstart', mousedown);
+
+			$('.controller').on('mousemove', mousemove);
+			$('.controller').on('touchmove', mousemove);
+
+			$('.up').on('click', function() {
+				$.get('http://localhost:3000/arm?dir=u');
+			});
+
+			$('.down').on('click', function() {
+				$.get('http://localhost:3000/arm?dir=d');
+			});
+		</script>
+	</body>
+</html>
