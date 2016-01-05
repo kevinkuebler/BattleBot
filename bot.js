@@ -12,18 +12,9 @@ board.on("ready", function() {
 
   console.log('ready');
 
-  var servo1 = new five.Servo({
+  var servo = new five.Servo({
     pin: "D2",
-	center: true,
-	type: "continuous",
-	debug: false
-  });
-
-  var servo2 = new five.Servo({
-	pin: "D3",
-	center: true,
-	
-	debug: false
+	startAt: 90
   });
 
   var rightWheel = new five.Motor({
@@ -63,16 +54,18 @@ board.on("ready", function() {
     rightWheel.rev(speed);
   }
 
-  function testServo() {
-  	servo1.sweep({ range: [45,135], interval: 5000 });
-  	servo2.sweep({ range: [45,135], interval: 5000 });
+  function armUp() {
+  	servo.to(180, 1000);
+  }
+
+  function armDown() {
+  	servo.home();
   }
 
   function exit() {
     leftWheel.rev(0);
     rightWheel.rev(0);
-    servo1.stop();
-    servo2.stop();
+    servo.stop();
     setTimeout(process.exit, 1000);
   }
 
@@ -82,7 +75,8 @@ board.on("ready", function() {
     'left': left,
     'right': right,
     'space': stop,
-    'x' : testServo,
+    'u' : armUp,
+    'd' : armDown,
     'q': exit
   };
 
