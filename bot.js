@@ -12,6 +12,8 @@ board.on("ready", function() {
 
   console.log('ready');
 
+  var servo;
+
   var rightWheel = new five.Motor({
     pins: { pwm: "D0", dir: "D4" },
     invertPWM: true
@@ -49,6 +51,20 @@ board.on("ready", function() {
     rightWheel.rev(speed);
   }
 
+  function setupServo() {
+  	console.log("Setting up servo...");
+  	servo = new five.Servo({
+  		pin: "D2",
+  		center: true,
+  		type: "continuous",
+  		debug: false
+  	});
+  }
+
+  function testServo() {
+  	servo.sweep([45,135]);
+  }
+
   function exit() {
     leftWheel.rev(0);
     rightWheel.rev(0);
@@ -62,6 +78,8 @@ board.on("ready", function() {
     'left': left,
     'right': right,
     'space': stop,
+    's' : setupServo,
+    'x' : testServo,
     'q': exit
   };
 
